@@ -52,6 +52,7 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+// show on page income and outcome
 function displayMovements(movements) {
   containerMovements.innerHTML = '';
   movements.forEach(function (value, index) {
@@ -71,7 +72,7 @@ function displayMovements(movements) {
 
 displayMovements(account1.movements);
 
-// show first letter name and second name
+// login and fio in obj
 function createLogin(accs) {
   accs.forEach((acc) => {
     acc.logIn = acc.owner
@@ -85,4 +86,35 @@ function createLogin(accs) {
 }
 
 createLogin(accounts);
-console.log(accounts);
+// console.log(accounts);
+
+// common balance
+function calcPrintBalance(movements) {
+  const balance = movements.reduce((acc, val) => {
+    return acc + val;
+  });
+
+  labelBalance.textContent = `${balance} RUB`;
+}
+
+calcPrintBalance(account1.movements);
+
+// outcome and income
+function calcDisplaySum(movements) {
+  const incomes = movements
+    .filter((mov) => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  // console.log(incomes);
+  labelSumIn.textContent = `${incomes} RUB`;
+
+  const out = movements
+    .filter((mov) => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+
+  // console.log(out);
+  labelSumOut.textContent = `${Math.abs(out)} RUB`;
+
+  labelSumInterest.textContent = `${incomes + out} RUB`;
+}
+
+calcDisplaySum(account1.movements);
