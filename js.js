@@ -57,10 +57,11 @@ function displayMovements(movements) {
   containerMovements.innerHTML = '';
   movements.forEach(function (value, index) {
     const type = value > 0 ? 'deposit' : 'withdrawal';
+    const typeMessage = value > 0 ? 'внесение' : 'снятие';
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">
-            ${index + 1} зачисление
+            ${index + 1} ${typeMessage}
           </div>
           <div class="movements__date">3 дня назад</div>
           <div class="movements__value">${value}₽</div>
@@ -69,8 +70,6 @@ function displayMovements(movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 }
-
-displayMovements(account1.movements);
 
 // login and fio in obj
 function createLogin(accs) {
@@ -84,37 +83,74 @@ function createLogin(accs) {
       .join('');
   });
 }
-
 createLogin(accounts);
-// console.log(accounts);
 
 // common balance
-function calcPrintBalance(movements) {
-  const balance = movements.reduce((acc, val) => {
+function calcPrintBalance(acc) {
+  acc.balance = acc.movements.reduce((acc, val) => {
     return acc + val;
   });
-
-  labelBalance.textContent = `${balance} RUB`;
+  labelBalance.textContent = `${acc.balance} RUB`;
 }
 
-calcPrintBalance(account1.movements);
 
 // outcome and income
 function calcDisplaySum(movements) {
   const incomes = movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  // console.log(incomes);
   labelSumIn.textContent = `${incomes} RUB`;
 
   const out = movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
 
-  // console.log(out);
   labelSumOut.textContent = `${Math.abs(out)} RUB`;
 
   labelSumInterest.textContent = `${incomes + out} RUB`;
 }
 
-calcDisplaySum(account1.movements);
+function updateUi(acc) {
+  displayMovements(acc.movements);
+  calcPrintBalance(acc);
+  calcDisplaySum(acc.movements);
+}
+
+
+// login operations
+let currentAccount;
+btnLogin.addEventListener('click', (e) => {
+  e.preventDefault();
+  currentAccount = accounts.find((acc) => {
+    return acc.logIn === inputLoginUsername.value
+  })
+  console.log(currentAccount)
+
+  // pin
+  if(currentAccount && currentAccount.pin === +inputLoginPin.value) {
+    containerApp.style.opacity = 100;
+
+    // erase data
+    inputLoginPin.value = '';
+    inputLoginUsername.value = '';
+
+    // show info
+    updateUi(currentAccount)
+  }
+})
+
+// transfer money to other acc
+btnTransfer.addEventListener('click', (e) => {
+  e.preventDefault();
+  const reciveAcc = accounts.find((acc) => {
+    return acc.logIn === inputTransferTo.value;
+  })
+  const amount = +inputTransferAmount.value;
+  // console.log(amount, reciveAcc)
+
+  if(reciveAcc && amount > 0 && currentAccount.balance >= amount && reciveAcc.logIn != currentAccount.logIn) {
+    currentAccount.movements.push(-amount);
+    reciveAcc.movements.push(amount);
+    updateUi(currentAccount)
+  }
+}) 
