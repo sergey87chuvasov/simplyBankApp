@@ -53,9 +53,12 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // show on page income and outcome
-function displayMovements(movements) {
+function displayMovements(movements, sort = false) {
   containerMovements.innerHTML = '';
-  movements.forEach(function (value, index) {
+
+  const movs = sort ? movements.slice().sort((a,b) => a-b) : movements;
+
+  movs.forEach(function (value, index) {
     const type = value > 0 ? 'deposit' : 'withdrawal';
     const typeMessage = value > 0 ? 'внесение' : 'снятие';
     const html = `
@@ -192,4 +195,26 @@ btnLoan.addEventListener('click', (e) => {
 
    // erase data
    inputLoanAmount.value = '';
+})
+
+//sum all money of accs
+const accMov = accounts.map(acc => {
+  return acc.movements
+})
+
+const allMov = accMov.flat();
+const allBalance = allMov.reduce((acc, mov) => {
+  return acc + mov
+}, 0)
+
+console.log(allBalance)
+
+const overalBalance = accounts.map(acc => acc.movements).flat().reduce((acc,mov) => acc + mov, 0);
+
+//add sort method
+let sorted = false
+btnSort.addEventListener('click', (e) => {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted)
+  sorted = !sorted
 })
