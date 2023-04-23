@@ -124,7 +124,7 @@ btnLogin.addEventListener('click', (e) => {
   currentAccount = accounts.find((acc) => {
     return acc.logIn === inputLoginUsername.value
   })
-  console.log(currentAccount)
+  // console.log(currentAccount)
 
   // pin
   if(currentAccount && currentAccount.pin === +inputLoginPin.value) {
@@ -151,6 +151,45 @@ btnTransfer.addEventListener('click', (e) => {
   if(reciveAcc && amount > 0 && currentAccount.balance >= amount && reciveAcc.logIn != currentAccount.logIn) {
     currentAccount.movements.push(-amount);
     reciveAcc.movements.push(amount);
-    updateUi(currentAccount)
+    updateUi(currentAccount);
+
+     // erase data
+     inputTransferTo.value = '';
+     inputTransferAmount.value = '';
   }
 }) 
+
+
+// close acc
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  if(inputCloseUsername.value === currentAccount.logIn && Number(inputClosePin.value) === currentAccount.pin)
+  {
+    const index = accounts.findIndex(acc => {
+      return acc.logIn === currentAccount.logIn
+    })
+    console.log(index)
+    accounts.splice(index, 1)
+    containerApp.style.opacity = 0;
+  }
+
+  // erase data
+  inputCloseUsername.value = '';
+  inputClosePin.value = '';
+})
+
+
+// put money
+btnLoan.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value)
+  if(amount > 0) {
+    currentAccount.movements.push(amount)
+    updateUi(currentAccount)
+  }
+
+   // erase data
+   inputLoanAmount.value = '';
+})
