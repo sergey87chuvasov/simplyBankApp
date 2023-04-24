@@ -207,8 +207,6 @@ const allBalance = allMov.reduce((acc, mov) => {
   return acc + mov
 }, 0)
 
-console.log(allBalance)
-
 const overalBalance = accounts.map(acc => acc.movements).flat().reduce((acc,mov) => acc + mov, 0);
 
 //add sort method
@@ -217,4 +215,11 @@ btnSort.addEventListener('click', (e) => {
   e.preventDefault();
   displayMovements(currentAccount.movements, !sorted)
   sorted = !sorted
+})
+
+//add description of value
+labelBalance.addEventListener('click', () => {
+  Array.from(document.querySelectorAll('.movements__value'), function(val, i) {
+    return (val.innerText = val.textContent.replace('₽', 'RUB'))
+  })
 })
