@@ -107,7 +107,6 @@ function formatMovementDate(date) {
   };
 
   const dayPassed = calcDaysPassed(new Date(), date);
-  console.log(dayPassed);
 
   if (dayPassed === 0) return 'Сегодня';
   if (dayPassed === 1) return 'Вчера';
@@ -186,10 +185,36 @@ function calcDisplaySum(movements) {
     .reduce((acc, mov) => acc + mov, 0);
 
   labelSumOut.textContent = `${Math.abs(out)} RUB`;
-
   labelSumInterest.textContent = `${incomes + out} RUB`;
 }
 
+// timer for 5 min session
+
+function startLogOut() {
+  let time = 300;
+
+  function tick() {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const seconds = String(time % 60).padStart(2, 0);
+
+    labelTimer.textContent = `${min}:${seconds}`;
+
+    if (time == 0) {
+      clearInterval(timer);
+      containerApp.style.opacity = 0;
+    }
+    time--;
+  }
+
+  tick();
+
+  const timer = setInterval(tick, 1000);
+  return timer;
+}
+
+let timer;
+
+// update ui
 function updateUi(acc) {
   displayMovements(acc);
   calcPrintBalance(acc);
@@ -203,7 +228,6 @@ btnLogin.addEventListener('click', (e) => {
   currentAccount = accounts.find((acc) => {
     return acc.logIn === inputLoginUsername.value;
   });
-  // console.log(currentAccount)
 
   // pin
   if (currentAccount && currentAccount.pin === +inputLoginPin.value) {
@@ -214,15 +238,42 @@ btnLogin.addEventListener('click', (e) => {
     inputLoginUsername.value = '';
 
     // data
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = `${now.getMonth() + 1}`.padStart(2, 0);
-    const date = `${now.getDate()}`.padStart(2, 0);
-    const hours = `${now.getHours()}`.padStart(2, 0);
-    const minutes = `${now.getMinutes()}`.padStart(2, 0);
-    labelDate.textContent = `${date}/${month}/${year} ${hours}:${minutes}`;
+    // const now = new Date();
+    // const year = now.getFullYear();
+    // const month = `${now.getMonth() + 1}`.padStart(2, 0);
+    // const date = `${now.getDate()}`.padStart(2, 0);
+    // const hours = `${now.getHours()}`.padStart(2, 0);
+    // const minutes = `${now.getMinutes()}`.padStart(2, 0);
+
+    // special object for data
+    const local = navigator.language;
+
+    const options = {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      weekday: 'short',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZoneName: 'long',
+      hour12: false,
+    };
+    // const now = new Date();
+    // const gb = Intl.DateTimeFormat(local, options).format(now);
+
+    // labelDate.textContent = `${date}/${month}/${year} ${hours}:${minutes}`;
+    labelDate.textContent = Intl.DateTimeFormat(local, options).format(
+      new Date()
+    );
 
     // show info
+
+    // for reset timer fo other users timer = startLogOut();
+    if (timer) {
+      clearInterval(timer);
+    }
+    timer = startLogOut();
     updateUi(currentAccount);
   }
 });
@@ -234,7 +285,6 @@ btnTransfer.addEventListener('click', (e) => {
     return acc.logIn === inputTransferTo.value;
   });
   const amount = +inputTransferAmount.value;
-  // console.log(amount, reciveAcc)
 
   if (
     reciveAcc &&
@@ -249,6 +299,10 @@ btnTransfer.addEventListener('click', (e) => {
     currentAccount.movementsDates.push(new Date().toISOString());
 
     updateUi(currentAccount);
+
+    // reset timer when we add some money
+    clearInterval(timer);
+    timer = startLogOut();
 
     // erase data
     inputTransferTo.value = '';
@@ -267,7 +321,6 @@ btnClose.addEventListener('click', (e) => {
     const index = accounts.findIndex((acc) => {
       return acc.logIn === currentAccount.logIn;
     });
-    console.log(index);
     accounts.splice(index, 1);
     containerApp.style.opacity = 0;
   }
@@ -287,6 +340,10 @@ btnLoan.addEventListener('click', (e) => {
 
     // add data when add new transfer money
     currentAccount.movementsDates.push(new Date().toISOString());
+
+    // reset timer when we put some money
+    clearInterval(timer);
+    timer = startLogOut();
 
     updateUi(currentAccount);
   }
